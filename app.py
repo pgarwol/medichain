@@ -1,17 +1,25 @@
 from flask import Flask, render_template, redirect, url_for, flash
+
+from blockchain import Blockchain
 from forms import PatientForm, EmergencyForm, ViewMedicalRecordForm, AddMedicalRecordForm
 from smart_contract import SmartContract
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'
+blockchain = Blockchain()
 
-smart_contract = SmartContract(
-    patient_id="patient123",
-    doctor_id="doctor456",
-    read=("doctor456",),
-    write=("doctor456",),
-    edit=("doctor456",)
-)
+logged_doctor_id = "D456"
+
+
+def create_smart_contract(patient_id, doctor_id):
+    return SmartContract(
+        patient_id=patient_id,
+        doctor_id=doctor_id,
+        read=(patient_id, doctor_id),
+        write=(doctor_id,),
+        edit=(doctor_id,),
+        blockchain=blockchain
+    )
 
 
 @app.route('/home')
@@ -45,14 +53,19 @@ def doctor():
         predicaments = [tuple(item.split(':')) for item in predicaments_raw]
         predicaments = [(name.strip(), int(amount.strip())) for name, amount in predicaments]
 
-        record_added = smart_contract.add_medical_record(date, patient_id, comment, predicaments)
-        if record_added:
-            flash('Medical record added and saved to blockchain', 'success')
-            print('Medical record added and saved to blockchain')
-        else:
-            flash('Failed to add medical record', 'danger')
-            print('Failed to add medical record')
+        smart_contract = create_smart_contract(patient_id, logged_doctor_id)
+
+        try:
+            mined_block = smart_contract.add_medical_record(date, patient_id, comment, predicaments)
+            if mined_block:
+                flash('Medical record added and saved to blockchain', 'success')
+            else:
+                flash('Failed to add medical record', 'danger')
+        except PermissionError as e:
+            flash(str(e), 'danger')
+
         return redirect(url_for('home'))
+
     return render_template('doctor.html', view_form=view_form, add_form=add_form)
 
 
