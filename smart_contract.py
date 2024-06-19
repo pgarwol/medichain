@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
-from medical_data import MedicalHistory, MedicalRecord
+from datetime import datetime
+
+from medical_data import MedicalHistory, MedicalRecord, Medication, Prescription
 from typing import Tuple
 
 
@@ -52,3 +54,16 @@ class SmartContract:
 
     def execute(self, func: callable):
         func()
+
+    def add_medical_record(self, date: datetime, patient_id: str, comment: str, predicaments: list[tuple[str, int]]):
+        if self.access_control.can_write(self.doctor_id):
+            medications = [Medication(name=name, amount=amount) for name, amount in predicaments]
+            prescription = Prescription(medications=tuple(medications))
+            medical_record = MedicalRecord(prescription=prescription, note=comment, patient_id=patient_id)
+            self.medical_history.write(medical_record)
+            print(f"Medical record added for patient {patient_id} on {date}")
+            return True
+        else:
+            print(f"Access denied for doctor {self.doctor_id} to add medical record")
+            return False
+

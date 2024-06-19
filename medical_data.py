@@ -11,7 +11,7 @@ class Medication:
 
 @dataclass
 class Prescription:
-    medications: Tuple[Medication]
+    medications: tuple[Medication, ...]
     additional_info: str = "-"
 
 
@@ -22,8 +22,8 @@ class MedicalRecord:
     timestamp: datetime
     note: str = ""
 
-    def __init__(self, prescription: Prescription, note: str):
-        self.id = ""  # TODO: create standard of IDs creation
+    def __init__(self, patient_id, prescription: Prescription, note: str):
+        self.id = patient_id  # TODO: create standard of IDs creation
         self.prescription = prescription
         self.note = note
         self.timestamp = datetime.now()

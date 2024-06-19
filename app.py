@@ -1,8 +1,17 @@
 from flask import Flask, render_template, redirect, url_for, flash
 from forms import PatientForm, EmergencyForm, ViewMedicalRecordForm, AddMedicalRecordForm
+from smart_contract import SmartContract
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'
+
+smart_contract = SmartContract(
+    patient_id="patient123",
+    doctor_id="doctor456",
+    read=("doctor456",),
+    write=("doctor456",),
+    edit=("doctor456",)
+)
 
 
 @app.route('/home')
@@ -26,13 +35,23 @@ def doctor():
     view_form = ViewMedicalRecordForm()
     add_form = AddMedicalRecordForm()
     if view_form.validate_on_submit():
-        # Process the form data for viewing medical records
         flash('Viewing medical records', 'success')
         return redirect(url_for('view_medical_record', record_id=view_form.record_id.data))
     elif add_form.validate_on_submit():
-        # Process the form data for adding a medical record
-        # In a real application, you would save this data to the database
-        flash('Adding medical record', 'success')
+        date = add_form.date.data
+        patient_id = add_form.patient_id.data
+        comment = add_form.comment.data
+        predicaments_raw = add_form.predicaments.data.split('\n')
+        predicaments = [tuple(item.split(':')) for item in predicaments_raw]
+        predicaments = [(name.strip(), int(amount.strip())) for name, amount in predicaments]
+
+        record_added = smart_contract.add_medical_record(date, patient_id, comment, predicaments)
+        if record_added:
+            flash('Medical record added and saved to blockchain', 'success')
+            print('Medical record added and saved to blockchain')
+        else:
+            flash('Failed to add medical record', 'danger')
+            print('Failed to add medical record')
         return redirect(url_for('home'))
     return render_template('doctor.html', view_form=view_form, add_form=add_form)
 

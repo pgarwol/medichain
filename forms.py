@@ -20,7 +20,7 @@ class AddMedicalRecordForm(FlaskForm):
     date = StringField('Date', validators=[DataRequired()])
     patient_id = StringField('Patient ID', validators=[DataRequired()])
     comment = TextAreaField('Comment', validators=[DataRequired()])
-    predicaments = TextAreaField('Predicaments', validators=[DataRequired()])
+    predicaments = TextAreaField('Medications (name:amount per line)', validators=[DataRequired()])
     submit = SubmitField('Add Record')
 
 

@@ -41,6 +41,13 @@
                             <span class="error">[{{ error }}]</span><br>
                             {% endfor %}
                         </p>
+                        <div class="form-button-pane">
+                            <div class="flex-row w-100" style="margin-bottom: 2rem; justify-content: space-evenly;">
+                                <div>
+                                    <p class="submit-btn-doctor">{{ view_form.submit() }}</p>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="view-record-form">
@@ -75,20 +82,18 @@
                                 <span class="error">[{{ error }}]</span><br>
                             {% endfor %}
                         </p>
+                        <div class="form-button-pane">
+                            <div class="flex-row w-100" style="margin-bottom: 2rem; justify-content: space-evenly;">
+                                <div>
+                                    <p class="submit-btn-doctor">{{ view_form.submit() }}</p>
+                                </div>
+                            </div>
+                        </div>
                     </form>
                 </div>
-
-
             </div>
+
             <div class="form-button-pane">
-                <div class="flex-row w-100" style="margin-bottom: 2rem; justify-content: space-evenly;">
-                    <div>
-                        <p class="submit-btn-doctor">{{ view_form.submit() }}</p>
-                    </div>
-                    <div>
-                        <p class="submit-btn-doctor">{{ add_form.submit() }}</p>
-                    </div>
-                </div>
                 <div>
                     <a href="{{ url_for('home') }}">&#8592; Back to Home</a>
                 </div>
