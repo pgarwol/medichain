@@ -294,13 +294,27 @@ p.add-record-textarea textarea {
 .record-data-container {
     display: flex;
     flex-direction: column;
+    margin-bottom: 20px;
 }
 
 .record-data-header > p {
     padding: 6px;
-    font-size: 2em;
+    font-size: 3em;
 }
 
 .record-data-content > p {
-    padding: 6px;
+    font-size: 2em;
+    padding: 6px 6px 6px 10px;
+}
+
+.record-data-content > ul {
+    padding-left: 10px;
+}
+
+.record-data-content > ul > li {
+    font-size: 2em;
+}
+
+.main-container-medical-record{
+    height: 70vh;
 }

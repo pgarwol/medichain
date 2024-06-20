@@ -112,6 +112,7 @@ class SmartContract:
             raise ValueError("No medical record found with the given ID.")
 
         medical_data = self._decrypt(transaction['medical_data'], decryption_key)
+        medical_data['timestamp'] = datetime.fromisoformat(medical_data['timestamp'])
 
         return medical_data
 

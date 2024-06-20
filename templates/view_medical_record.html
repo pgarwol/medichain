@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
 </head>
 <body class="home">
-    <div class="main-container" id="home-container">
+    <div class="main-container main-container-medical-record" id="home-container">
         <div class="home-wrapper">
             <div class="form-header">
                 <h1 class="home-title">&#128209; {{ medical_record.id }} </h1>
@@ -69,6 +69,13 @@
                     </div>
                 </div>
             </div>
+
+            <div class="form-button-pane">
+                <div>
+                    <a href="{{ url_for('home') }}">&#8592; Back to Home</a>
+                </div>
+            </div>
+
         </div>
     </div>
 </body>
