@@ -13,16 +13,15 @@
     <div class="main-container" id="home-container">
         <div class="home-wrapper">
             <div class="form-header">
-                <h1 class="home-title">&#128209; {{ medical_record.record_id }} </h1>
+                <h1 class="home-title">&#128209; {{ medical_record.id }} </h1>
             </div>
             <div class="medical-record-content">
-
                 <div class="record-data-container">
                     <div class="record-data-header">
-                        <p>Patient</p>
+                        <p>Patient ID</p>
                     </div>
                     <div class="record-data-content">
-                        <p> {{ medical_record.patient_id }} Jan Kowalski</p>
+                        <p>{{ medical_record.id }}</p>
                     </div>
                 </div>
                 <div class="record-data-container">
@@ -30,35 +29,47 @@
                         <p>Date</p>
                     </div>
                     <div class="record-data-content">
-                        <p> {{ medical_record.date }} 01.01.1970 </p>
+                        <p>{{ medical_record.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</p>
                     </div>
                 </div>
                 <div class="record-data-container">
                     <div class="record-data-header">
-                        <p>Predicaments</p>
+                        <p>Medications</p>
                     </div>
                     <div class="record-data-content">
-                        <p> {{ medical_record.predicaments }} Suspendisse potenti. Ut ultrices egestas facilisis. Cras maximus quis odio vel gravida. Curabitur hendrerit arcu facilisis sapien scelerisque, id lobortis est ullamcorper. Morbi efficitur aliquam cursus. Nunc tellus dolor, interdum vel pellentesque at, egestas id mauris. Maecenas cursus dictum placerat. Curabitur non felis leo.</p>
+                        <ul>
+                        {% for medication in medical_record.prescription.medications %}
+                            <li>{{ medication.name }}: {{ medication.amount }}</li>
+                        {% endfor %}
+                        </ul>
                     </div>
                 </div>
                 <div class="record-data-container">
+                    <div class="record-data-header">
+                        <p>Additional Info</p>
+                    </div>
                     <div class="record-data-content">
-                        <p> {{ medical_record.comment }} Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ut gravida nunc. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Integer lacinia elit massa, eu posuere dolor vestibulum eget. In in pharetra diam, eget egestas mauris. Duis condimentum risus nisi, sit amet porttitor mi fermentum non.</p>
+                        <p>{{ medical_record.prescription.additional_info }}</p>
                     </div>
                 </div>
-                 <div class="record-data-container">
+                <div class="record-data-container">
                     <div class="record-data-header">
-                        <p>Doctor</p>
+                        <p>Note</p>
                     </div>
                     <div class="record-data-content">
-                        <p> {{ medical_record.doctor_id }} Lorem ipsum </p>
+                        <p>{{ medical_record.note }}</p>
+                    </div>
+                </div>
+                <div class="record-data-container">
+                    <div class="record-data-header">
+                        <p>Doctor ID</p>
+                    </div>
+                    <div class="record-data-content">
+                        <p>{{ medical_record.doctor_id }}</p>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 </body>
 </html>
-
-

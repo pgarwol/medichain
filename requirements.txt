@@ -1,3 +1,6 @@
+typing-extensions
+numpy
+packaging
 flask
 flask_wtf
 wtforms

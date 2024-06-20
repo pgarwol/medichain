@@ -1,3 +1,4 @@
+import json
 from typing import Any
 
 from cryptography.fernet import Fernet, InvalidToken
@@ -27,18 +28,20 @@ class CryptographyManager:
 
     def encrypt_item(self, item_id: str, data: Any) -> str:
         helper = CryptographyHelper()
+        data = json.dumps(data)
         encrypted_data = helper.encrypt_data(data)
         self.keys[item_id] = helper.get_key()
         return encrypted_data
 
-    def decrypt_item(self, item_id: str, encrypted_data: str, provided_key: str) -> str:
+    def decrypt_item(self, item_id: str, encrypted_data: str, provided_key: str) -> dict:
         key = self.keys.get(item_id)
         if not key:
             raise ValueError("No key found for the given item ID.")
         if provided_key != key:
             raise ValueError("Provided key does not match the stored key.")
         helper = CryptographyHelper(key=provided_key.encode())
-        return helper.decrypt_data(encrypted_data)
+        data = helper.decrypt_data(encrypted_data)
+        return json.loads(data)
 
     def check_key(self, item_id: str, encrypted_data: str, provided_key: str) -> bool:
         try:
