@@ -33,15 +33,18 @@ class CryptographyManager:
         self.keys[item_id] = helper.get_key()
         return encrypted_data
 
-    def decrypt_item(self, item_id: str, encrypted_data: str, provided_key: str) -> dict:
+    def decrypt_item(self, item_id: str, encrypted_data: str, provided_key: str) -> dict | None:
         key = self.keys.get(item_id)
         if not key:
             raise ValueError("No key found for the given item ID.")
         if provided_key != key:
             raise ValueError("Provided key does not match the stored key.")
         helper = CryptographyHelper(key=provided_key.encode())
-        data = helper.decrypt_data(encrypted_data)
-        return json.loads(data)
+        try:
+            data = helper.decrypt_data(encrypted_data)
+            return json.loads(data)
+        except InvalidToken:
+            return None
 
     def check_key(self, item_id: str, encrypted_data: str, provided_key: str) -> bool:
         try:

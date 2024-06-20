@@ -104,17 +104,16 @@ class SmartContract:
 
         for block in self.blockchain.chain:
             for tx in block.transactions:
-                if tx.get('medical_data') and self._decrypt(tx['medical_data'], decryption_key).get('id') == record_id:
-                    transaction = tx
-                    break
+                tx_medical = self._decrypt(tx['medical_data'], decryption_key)
+                if tx_medical is not None:
+                    if tx_medical.get('id') == record_id:
+                        transaction = tx
+                        medical_data = self._decrypt(transaction['medical_data'], decryption_key)
+                        medical_data['timestamp'] = datetime.fromisoformat(medical_data['timestamp'])
+                        return medical_data
 
         if not transaction:
             raise ValueError("No medical record found with the given ID.")
-
-        medical_data = self._decrypt(transaction['medical_data'], decryption_key)
-        medical_data['timestamp'] = datetime.fromisoformat(medical_data['timestamp'])
-
-        return medical_data
 
     def _decrypt(self, encrypted_data: str, key: str) -> dict:
         return self.encryption.decrypt_item(item_id=self.patient_id, encrypted_data=encrypted_data,
