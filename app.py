@@ -6,7 +6,7 @@ from smart_contract import SmartContract
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your_secret_key_here'
-blockchain = Blockchain()
+blockchain = Blockchain(difficulty=5)
 
 logged_doctor_id = "D456"
 

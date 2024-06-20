@@ -3,6 +3,7 @@ from datetime import datetime
 
 from audit_trail import AuditTrail
 from blockchain import Blockchain
+from encryption import CryptographyManager
 from medical_data import MedicalHistory, MedicalRecord, Medication, Prescription
 
 
@@ -44,6 +45,7 @@ class SmartContract:
         self.access_control = AccessControl(read=read, write=write, edit=edit)
         self.medical_history = MedicalHistory()
         self.blockchain = blockchain
+        self.encryption = CryptographyManager()
 
     def handle_access(self, access_type: str):
         match access_type:
@@ -68,17 +70,25 @@ class SmartContract:
             medical_record = MedicalRecord(prescription=prescription, note=comment, patient_id=patient_id)
 
             # Encrypt data
-            encrypted_data = self.blockchain.encrypt_data(medical_record.__dict__, patient_id)
+            encrypted_data = self.encryption.encrypt_item(item_id=patient_id, data=medical_record.__dict__)
             audit_trail = AuditTrail(patient_id=patient_id, doctor_id=self.doctor_id)
 
             # Create transaction and mine block
             transaction = {
                 "medical_data": encrypted_data,
-                "audit_trail": audit_trail
+                "audit_trail": audit_trail.to_dict(),
             }
-            self.blockchain.add_new_transaction(transaction)
-            mined_block = self.blockchain.mine()
 
-            return mined_block
+            # Add the transaction to the blockchain
+            self.blockchain.add_transaction(transaction)
+
+            mined = False
+
+            # Optionally, create a new block if enough transactions are pending
+            if len(self.blockchain.pending_transactions) >= 1:
+                mined = self.blockchain.mine_pending_transactions()
+
+            return mined
+
         else:
             raise PermissionError("Doctor does not have write access to add medical records.")

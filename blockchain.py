@@ -1,75 +1,78 @@
 import hashlib
 import json
-from dataclasses import dataclass
-from datetime import datetime
-from typing import List, Dict, Any
-
-from audit_trail import AuditTrail
-from encryption import CryptographyManager
+from time import time
+from typing import List
 
 
-@dataclass
 class Block:
-    index: int
-    timestamp: datetime
-    medical_data: str
-    audit_trail: AuditTrail
-    previous_hash: str
-    hash: str = ""
+    def __init__(self, index: int, timestamp: float, transactions: List[dict], previous_hash: str, nonce: int = 0):
+        self.index = index
+        self.timestamp = timestamp
+        self.transactions = transactions
+        self.previous_hash = previous_hash
+        self.nonce = nonce
+        self.hash = self.compute_hash()
 
-    def compute_hash(self) -> str:
-        block_string = json.dumps(self.__dict__, sort_keys=True, default=str)
+    def compute_hash(self):
+        block_string = json.dumps(self.__dict__, sort_keys=True)
         return hashlib.sha256(block_string.encode()).hexdigest()
+
+    def proof_of_work(self, difficulty):
+        print(f"Mining block {self.index}")
+        self.nonce = 0
+        computed_hash = self.compute_hash()
+        while not computed_hash.startswith('0' * difficulty):
+            self.nonce += 1
+            computed_hash = self.compute_hash()
+        print(f"Block {self.index} mined with hash: {computed_hash}")
+        return computed_hash
 
 
 class Blockchain:
-    def __init__(self):
-        self.chain: List[Block] = []
-        self.pending_transactions: List[Dict[str, Any]] = []
+    def __init__(self, difficulty: int = 2):
+        self.chain = []
+        self.difficulty = difficulty  # Difficulty level for PoW
+        self.pending_transactions = []  # Transactions waiting to be added to the blockchain
         self.create_genesis_block()
-        self.cryptography_manager = CryptographyManager()
 
     def create_genesis_block(self):
-        genesis_block = Block(
-            index=0,
-            timestamp=datetime.now(),
-            medical_data="Genesis Block",
-            audit_trail=AuditTrail(patient_id="0", doctor_id="0"),
-            previous_hash="0"
-        )
-        genesis_block.hash = genesis_block.compute_hash()
+        genesis_block = Block(0, time(), [], "0")
+        genesis_block.hash = genesis_block.proof_of_work(self.difficulty)
         self.chain.append(genesis_block)
 
-    def get_last_block(self) -> Block:
-        return self.chain[-1]
-
-    def add_new_block(self, block: Block):
-        block.previous_hash = self.get_last_block().hash
-        block.hash = block.compute_hash()
-        self.chain.append(block)
-
-    def add_new_transaction(self, transaction: Dict[str, Any]):
-        self.pending_transactions.append(transaction)
-
-    def mine(self):
+    def create_new_block_from_pending_transactions(self):
         if not self.pending_transactions:
             return False
 
-        last_block = self.get_last_block()
-        new_block = Block(
-            index=last_block.index + 1,
-            timestamp=datetime.now(),
-            medical_data=self.pending_transactions[0]["medical_data"],
-            audit_trail=self.pending_transactions[0]["audit_trail"],
-            previous_hash=last_block.hash
+        block = Block(
+            index=len(self.chain),
+            timestamp=time(),
+            transactions=self.pending_transactions,
+            previous_hash=self.chain[-1].hash
         )
-        new_block.hash = new_block.compute_hash()
-        self.chain.append(new_block)
+        block.hash = block.proof_of_work(self.difficulty)
+        self.chain.append(block)
         self.pending_transactions = []
-        return new_block
+        return True
 
-    def encrypt_data(self, data: Any, item_id: str) -> str:
-        return self.cryptography_manager.encrypt_item(item_id, data)
+    def add_transaction(self, transaction: dict):
+        self.pending_transactions.append(transaction)
 
-    def decrypt_data(self, encrypted_data: str, item_id: str, provided_key: str) -> str:
-        return self.cryptography_manager.decrypt_item(item_id, encrypted_data, provided_key)
+    def is_chain_valid(self):
+        for i in range(1, len(self.chain)):
+            current = self.chain[i]
+            previous = self.chain[i - 1]
+
+            if current.hash != current.compute_hash():
+                return False
+
+            if current.previous_hash != previous.hash:
+                return False
+
+        return True
+
+    def mine_pending_transactions(self):
+        mined = False
+        while self.pending_transactions:
+            mined = self.create_new_block_from_pending_transactions()
+        return mined
