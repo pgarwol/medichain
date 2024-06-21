@@ -63,7 +63,7 @@ class SmartContract:
     def execute(self, func: callable):
         func()
 
-    def add_medical_record(self, date: datetime, patient_id: str, comment: str, predicaments: list[tuple[str, int]]):
+    def add_medical_record(self, patient_id: str, comment: str, predicaments: list[tuple[str, int]]):
 
         if self.access_control.can_write(self.doctor_id):
             # Create MedicalRecord

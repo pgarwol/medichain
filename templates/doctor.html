@@ -55,13 +55,6 @@
                     <form method="POST" action="{{ url_for('doctor') }}">
                         {{ add_form.hidden_tag() }}
                         <p>
-                            {{ add_form.date.label }}<br>
-                            {{ add_form.date(size=32) }}<br>
-                            {% for error in add_form.date.errors %}
-                                <span class="error">[{{ error }}]</span><br>
-                            {% endfor %}
-                        </p>
-                        <p>
                             {{ add_form.patient_id.label }}<br>
                             {{ add_form.patient_id(size=32) }}<br>
                             {% for error in add_form.patient_id.errors %}
@@ -79,6 +72,13 @@
                             {{ add_form.predicaments.label }}<br>
                             {{ add_form.predicaments(cols=32, rows=4) }}<br>
                             {% for error in add_form.predicaments.errors %}
+                                <span class="error">[{{ error }}]</span><br>
+                            {% endfor %}
+                        </p>
+                        <p>
+                            {{ add_form.password.label }}<br>
+                            {{ add_form.password(size=32) }}<br>
+                            {% for error in add_form.password.errors %}
                                 <span class="error">[{{ error }}]</span><br>
                             {% endfor %}
                         </p>
