@@ -4,14 +4,13 @@ from wtforms.validators import DataRequired
 
 
 class PatientForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
-    age = IntegerField('Age', validators=[DataRequired()])
+    patient_id = StringField('Patient ID', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('View Record')
-    decryption_key = StringField('Decryption Key', validators=[DataRequired()])
 
 
 class ViewMedicalRecordForm(FlaskForm):
-    record_id = StringField('Record ID', validators=[DataRequired()])
+    patient_id = StringField('Patient ID', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('View Record')
 

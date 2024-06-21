@@ -16,14 +16,15 @@
                 <h1 class="doctor-title">👨‍⚕️Doctor</h1>
             </div>
             <div class="form-content doctor-content">
-                <div class="add-record-form">
+                <div class="view-record-form">
                     <h2>View Medical Records</h2>
                     <form method="POST" action="{{ url_for('doctor') }}">
                         {{ view_form.hidden_tag() }}
+                        <input type="hidden" name="form_type" value="view">
                         <p>
-                            {{ view_form.record_id.label }}<br>
-                            {{ view_form.record_id(size=32) }}<br>
-                            {% for error in view_form.record_id.errors %}
+                            {{ view_form.patient_id.label }}<br>
+                            {{ view_form.patient_id(size=32) }}<br>
+                            {% for error in view_form.patient_id.errors %}
                             <span class="error">[{{ error }}]</span><br>
                             {% endfor %}
                         </p>
@@ -43,10 +44,11 @@
                         </div>
                     </form>
                 </div>
-                <div class="view-record-form">
+                <div class="add-record-form">
                     <h2>Add Medical Record</h2>
                     <form method="POST" action="{{ url_for('doctor') }}">
                         {{ add_form.hidden_tag() }}
+                        <input type="hidden" name="form_type" value="add">
                         <p>
                             {{ add_form.patient_id.label }}<br>
                             {{ add_form.patient_id(size=32) }}<br>
@@ -78,7 +80,7 @@
                         <div class="form-button-pane">
                             <div class="flex-row w-100" style="margin-bottom: 2rem; justify-content: space-evenly;">
                                 <div>
-                                    <p class="submit-btn-doctor">{{ view_form.submit() }}</p>
+                                    <p class="submit-btn-doctor">{{ add_form.submit() }}</p>
                                 </div>
                             </div>
                         </div>

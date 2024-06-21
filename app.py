@@ -1,6 +1,6 @@
 import logging
 from cryptography.fernet import InvalidToken
-from flask import Flask, render_template, redirect, url_for, flash, session
+from flask import Flask, render_template, redirect, url_for, flash, session, request
 
 from blockchain import Blockchain
 from doctor_key_manager import DoctorKeyManager
@@ -39,46 +39,48 @@ def home():
 @app.route('/patient', methods=['GET', 'POST'])
 def patient():
     form = PatientForm()
-    view_form = ViewMedicalRecordForm()
-    if view_form.validate_on_submit():
+    if form.validate_on_submit():
         # Process the form data for viewing medical records
-        flash('Viewing medical records', 'success')
-        return redirect(url_for('view_medical_record', record_id=view_form.record_id.data))
-    return render_template('patient.html', form=form, view_form=view_form)
+        print('Viewing medical records')
+    #     flash('Viewing medical records', 'success')
+    #     return redirect(url_for('view_medical_record', record_id=view_form.record_id.data))
+    return render_template('patient.html', form=form)
 
 
 @app.route('/doctor', methods=['GET', 'POST'])
 def doctor():
     view_form = ViewMedicalRecordForm()
     add_form = AddMedicalRecordForm()
-    if view_form.validate_on_submit():
-        session['password'] = add_form.password.data
-        flash('Viewing medical records', 'success')
-        return redirect(url_for('view_medical_record', record_id=view_form.record_id.data))
-    elif add_form.validate_on_submit():
-        patient_id = add_form.patient_id.data
-        comment = add_form.comment.data
-        predicaments_raw = add_form.predicaments.data.split('\n')
-        predicaments = [tuple(item.split(':')) for item in predicaments_raw]
-        predicaments = [(name.strip(), int(amount.strip())) for name, amount in predicaments]
+    form_type = request.form.get('form_type')
+    if request.method == 'POST':
+        if form_type == 'view' and view_form.validate_on_submit():
+            session['password'] = view_form.password.data
+            flash('Viewing medical records', 'success')
+            return redirect(url_for('view_medical_record', patient_id=view_form.patient_id.data))
+        elif form_type == 'add' and add_form.validate_on_submit():
+            patient_id = add_form.patient_id.data
+            comment = add_form.comment.data
+            predicaments_raw = add_form.predicaments.data.split('\n')
+            predicaments = [tuple(item.split(':')) for item in predicaments_raw]
+            predicaments = [(name.strip(), int(amount.strip())) for name, amount in predicaments]
 
-        smart_contract = create_smart_contract(patient_id, logged_doctor_id)
+            smart_contract = create_smart_contract(patient_id, logged_doctor_id)
 
-        try:
-            mined_block, encryption_key = smart_contract.add_medical_record(patient_id, comment, predicaments)
-            if mined_block:
-                key_manager.add_key(logged_doctor_id, patient_id, encryption_key, add_form.password.data)
-                flash('Medical record added and saved to blockchain', 'success')
-            else:
-                flash('Failed to add medical record', 'danger')
-        except PermissionError as e:
-            flash(str(e), 'danger')
-        except InvalidToken as e:
-            flash('Invalid password', 'danger')
-            logging.error('Invalid password')
-            return redirect(url_for('doctor'))
+            try:
+                mined_block, encryption_key = smart_contract.add_medical_record(patient_id, comment, predicaments)
+                if mined_block:
+                    key_manager.add_key(logged_doctor_id, patient_id, encryption_key, add_form.password.data)
+                    flash('Medical record added and saved to blockchain', 'success')
+                else:
+                    flash('Failed to add medical record', 'danger')
+            except PermissionError as e:
+                flash(str(e), 'danger')
+            except InvalidToken as e:
+                flash('Invalid password', 'danger')
+                logging.error('Invalid password')
+                return redirect(url_for('doctor'))
 
-        return redirect(url_for('home'))
+            return redirect(url_for('home'))
 
     return render_template('doctor.html', view_form=view_form, add_form=add_form)
 
@@ -93,9 +95,9 @@ def emergency():
     return render_template('emergency.html', form=form)
 
 
-@app.route('/view_medical_record/<record_id>')
-def view_medical_record(record_id):
-    medical_record = {"record_id": record_id}
+@app.route('/view_medical_record/<patient_id>')
+def view_medical_record(patient_id):
+    medical_record = {"record_id": patient_id}
 
     password = session.get('password')
     if not password:
@@ -103,9 +105,9 @@ def view_medical_record(record_id):
         return redirect(url_for('home'))
 
     try:
-        decryption_key = key_manager.get_key(logged_doctor_id, record_id, password)
+        decryption_key = key_manager.get_key(logged_doctor_id, patient_id, password)
         smart_contract = create_smart_contract(medical_record['record_id'], logged_doctor_id)
-        decrypted_data = smart_contract.view_medical_record(record_id, decryption_key)
+        decrypted_data = smart_contract.view_medical_record(patient_id, decryption_key)
         medical_record.update(decrypted_data)
     except ValueError as e:
         flash(str(e), 'danger')
