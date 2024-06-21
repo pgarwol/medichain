@@ -98,7 +98,7 @@ class SmartContract:
         else:
             raise PermissionError("Doctor does not have write access to add medical records.")
 
-    def view_medical_record(self, record_id: str, decryption_key: str) -> dict:
+    def view_medical_record(self, patient_id: str, decryption_key: str) -> dict:
 
         transaction = None
 
@@ -106,7 +106,7 @@ class SmartContract:
             for tx in block.transactions:
                 tx_medical = self._decrypt(tx['medical_data'], decryption_key)
                 if tx_medical is not None:
-                    if tx_medical.get('id') == record_id:
+                    if tx_medical.get('id') == patient_id:
                         transaction = tx
                         medical_data = self._decrypt(transaction['medical_data'], decryption_key)
                         medical_data['timestamp'] = datetime.fromisoformat(medical_data['timestamp'])

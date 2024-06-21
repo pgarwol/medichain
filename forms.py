@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired
 
 class PatientForm(FlaskForm):
     patient_id = StringField('Patient ID', validators=[DataRequired()])
-    password = PasswordField('Password', validators=[DataRequired()])
+    code = PasswordField('Code', validators=[DataRequired()])
     submit = SubmitField('View Record')
 
 

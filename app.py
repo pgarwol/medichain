@@ -20,7 +20,7 @@ doctor_password = "securepassword"
 key_manager.create_account(logged_doctor_id, doctor_password)
 
 
-def create_smart_contract(patient_id, doctor_id):
+def create_smart_contract(patient_id, doctor_id=None):
     return SmartContract(
         patient_id=patient_id,
         doctor_id=doctor_id,
@@ -42,7 +42,7 @@ def patient():
     form = PatientForm()
     if request.method == 'POST' and form.validate_on_submit():
         flash('Viewing medical records', 'success')
-        session['password'] = form.password.data
+        session['code'] = form.code.data
         return redirect(url_for('view_medical_record_patient', patient_id=form.patient_id.data))
     return render_template('patient.html', form=form)
 
@@ -71,7 +71,7 @@ def doctor():
                 if mined_block:
                     one_time_code = (key_manager.
                                      add_key(logged_doctor_id, patient_id, encryption_key, add_form.password.data))
-                    print(f'One-time code for patient: {one_time_code}')
+                    print(f'One-time code for patient with {patient_id}: {one_time_code}')
                     flash('Medical record added and saved to blockchain', 'success')
                 else:
                     flash('Failed to add medical record', 'danger')
@@ -124,21 +124,21 @@ def view_medical_record_doctor(patient_id):
 def view_medical_record_patient(patient_id):
     medical_record = {}
 
-    password = session.get('password')
-    if not password:
+    code = session.get('code')
+    if not code:
         flash('Password not found in session', 'danger')
         return redirect(url_for('home'))
 
     try:
-        decryption_key = key_manager.get_key_from_password(logged_doctor_id, patient_id, password)
-        smart_contract = create_smart_contract(patient_id, logged_doctor_id)
+        decryption_key = key_manager.get_key_from_code(code=code, patient_id=patient_id)
+        smart_contract = create_smart_contract(patient_id)
         decrypted_data = smart_contract.view_medical_record(patient_id, decryption_key)
         medical_record.update(decrypted_data)
     except ValueError as e:
         flash(str(e), 'danger')
         return redirect(url_for('home'))
     finally:
-        session.pop('password', None)
+        session.pop('code', None)
 
     return render_template('view_medical_record.html', medical_record=medical_record)
 

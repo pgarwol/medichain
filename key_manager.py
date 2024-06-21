@@ -95,6 +95,7 @@ class KeyManager:
         encrypted_key = self.patient_codes[patient_id]['key']
         try:
             decrypted_key = cipher_suite.decrypt(encrypted_key).decode()
+            self.patient_codes.pop(patient_id)
             return decrypted_key
         except InvalidToken:
             raise ValueError("Invalid code.")
