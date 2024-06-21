@@ -17,7 +17,7 @@
             </div>
             <div class="form-content one-form-page">
                 <h2>View Medical Records</h2>
-                <form method="POST" action="{{ url_for('doctor') }}">
+                <form method="POST" action="{{ url_for('patient') }}">
                     {{ form.hidden_tag() }}
                     <p>
                         {{ form.patient_id.label }}<br>
@@ -33,16 +33,17 @@
                             <span class="error">[{{ error }}]</span><br>
                         {% endfor %}
                     </p>
+                         <div class="form-button-pane">
+                            <div style="margin-bottom: 2rem;">
+                                <p class="submit-btn-patient">{{ form.submit() }}</p>
+                            </div>
+                        </div>
                 </form>
-            </div>
-            <div class="form-button-pane">
-                <div style="margin-bottom: 2rem;">
-                    <p class="submit-btn-patient">{{ form.submit() }}</p>
-                </div>
                 <div>
                     <a href="{{ url_for('home') }}">&#8592; Back to Home</a>
                 </div>
             </div>
+
         </div>
     </div>
 </body>
