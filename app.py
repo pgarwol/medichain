@@ -1,7 +1,6 @@
 import logging
-
 from cryptography.fernet import InvalidToken
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, session
 
 from blockchain import Blockchain
 from doctor_key_manager import DoctorKeyManager
@@ -53,9 +52,9 @@ def doctor():
     view_form = ViewMedicalRecordForm()
     add_form = AddMedicalRecordForm()
     if view_form.validate_on_submit():
+        session['password'] = add_form.password.data
         flash('Viewing medical records', 'success')
-        return redirect(url_for('view_medical_record', record_id=view_form.record_id.data,
-                                password=add_form.password.data))
+        return redirect(url_for('view_medical_record', record_id=view_form.record_id.data))
     elif add_form.validate_on_submit():
         patient_id = add_form.patient_id.data
         comment = add_form.comment.data
@@ -95,8 +94,13 @@ def emergency():
 
 
 @app.route('/view_medical_record/<record_id>')
-def view_medical_record(record_id, password):
+def view_medical_record(record_id):
     medical_record = {"record_id": record_id}
+
+    password = session.get('password')
+    if not password:
+        flash('Password not found in session', 'danger')
+        return redirect(url_for('home'))
 
     try:
         decryption_key = key_manager.get_key(logged_doctor_id, record_id, password)
@@ -106,6 +110,8 @@ def view_medical_record(record_id, password):
     except ValueError as e:
         flash(str(e), 'danger')
         return redirect(url_for('home'))
+    finally:
+        session.pop('password', None)
 
     return render_template('view_medical_record.html', medical_record=medical_record)
 

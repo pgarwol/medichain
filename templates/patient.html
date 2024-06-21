@@ -34,9 +34,9 @@
                         {% endfor %}
                     </p>
                     <p>
-                        {{ view_form.decryption_key.label }}<br>
-                        {{ view_form.decryption_key(size=32) }}<br>
-                        {% for error in view_form.decryption_key.errors %}
+                        {{ form.decryption_key.label }}<br>
+                        {{ form.decryption_key(size=32) }}<br>
+                        {% for error in form.decryption_key.errors %}
                             <span class="error">[{{ error }}]</span><br>
                         {% endfor %}
                     </p>
