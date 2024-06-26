@@ -9,7 +9,7 @@ from forms import PatientForm, ViewMedicalRecordForm, AddMedicalRecordForm
 from smart_contract import SmartContract
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_secret_key_here'
+
 blockchain = Blockchain(difficulty=1)
 crypto_manager = CryptographyManager()
 key_manager = KeyManager()
